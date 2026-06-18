@@ -1,1 +1,1 @@
-# ying-yang
+# Ying Yang Puzzle
