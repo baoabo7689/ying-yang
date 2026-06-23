@@ -106,11 +106,33 @@ function defaultClues(width: number, height: number): number {
   return Math.round(total * 0.35);
 }
 
+const COLORS: CellColor[] = ['gray', 'black', 'white'];
+
+function randomColor(forbidden: CellColor | null): CellColor {
+  const choices = forbidden ? COLORS.filter((c) => c !== forbidden) : COLORS;
+  return choices[Math.floor(Math.random() * choices.length)];
+}
+
 export const initUtilities = {
-  random(difficulty: 'easy' | 'medium' | 'hard', width = 15, height = 15): Board | null {
-    const total = width * height;
-    const ratio = difficulty === 'easy' ? 0.45 : difficulty === 'medium' ? 0.35 : 0.25;
-    return generatePuzzle(width, height, Math.round(total * ratio));
+  // Fill each cell randomly, ensuring no 2×2 block is all the same color.
+  // When placing (r,c) in row-major order, only the block where (r,c) is the
+  // bottom-right corner can become complete. If the other three cells share a
+  // single color, exclude it — with 3 choices at least 2 are always valid.
+  random(width = 15, height = 15): Board {
+    const board: Board = Array.from({ length: height }, () => Array(width).fill('gray' as CellColor));
+    for (let r = 0; r < height; r++) {
+      for (let c = 0; c < width; c++) {
+        let forbidden: CellColor | null = null;
+        if (r > 0 && c > 0) {
+          const tl = board[r - 1][c - 1];
+          const tr = board[r - 1][c];
+          const bl = board[r][c - 1];
+          if (tl === tr && tr === bl) forbidden = tl;
+        }
+        board[r][c] = randomColor(forbidden);
+      }
+    }
+    return board;
   },
   generateFull(width = 15, height = 15): Board | null {
     return generateFullBoard(width, height);

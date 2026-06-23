@@ -52,13 +52,11 @@ export default function HomePage() {
   // ── Init ──────────────────────────────────────────────────────────────────
 
   const handleRandom = () => {
-    const board = initUtilities.random('medium', width, height);
-    if (!board) { setMessage('Could not generate puzzle. Try again.'); return; }
+    const board = initUtilities.random(width, height);
     let g = createEmptyGrid(width, height);
     for (let r = 0; r < height; r++)
       for (let c = 0; c < width; c++)
         if (board[r][c] !== 'gray') g = updateCell(g, r, c, board[r][c]);
-    g = g.blockInit();
     setGrid(g);
     setMessage('');
   };
@@ -184,7 +182,7 @@ export default function HomePage() {
             <textarea
               readOnly
               value={message}
-              className="w-full h-64 border border-gray-300 rounded-lg p-3 font-mono text-sm bg-white resize-none focus:outline-none"
+              className="w-full h-[600px] border border-gray-300 rounded-lg p-3 font-mono text-sm bg-white resize-none focus:outline-none"
               placeholder="Messages and exported data appear here…"
             />
           </div>
