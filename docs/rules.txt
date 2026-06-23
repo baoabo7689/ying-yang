@@ -1,0 +1,12 @@
+The Rules
+	The 2 × 2 Constraint: 
+	No 2 × 2 block of cells can be entirely the same color. 
+	You must have at least one of the opposite symbols in every 2 × 2 square.
+	
+	Orthogonal Connectivity: 
+	All cells of the same symbol must be connected to each other horizontally or vertically, forming a single continuous group. 
+	Neither color can be completely isolated from its own kind.
+	
+	The Given Clues: 
+	Some cells start with predefined symbols (e.g., black or white circles), 
+	which cannot be changed and serve as your starting points for deduction.

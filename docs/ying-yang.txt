@@ -31,16 +31,29 @@ suggest some techniques to solve ying-yang  puzzle
 
 
 
+learn from code D:\Ps\BB\sudoku [this is for sudoku game with different rules]
+make ying-yang game to folder D:\Ps\BB\ying-yang
+with rules as in the doc: D:\Ps\BB\ying-yang\docs\rules.txt
+this include:
+Init section: Random, Import, Manual
+Functional: Validate, Export, Block Init, Solve
+Cell Model with: gray for unknown, black as ying, white as yang
 
-
-
-
-
-
-
-
-
-
+Validation base on rules.txt
+Solution base on idea:
+	1. for each square 2x2, if contain 3 cells with same color A then last cell have color B 
+	2. if a [cell X with color A] have [left L and right R cells with color B],
+	spread cell L to the left with same color B [up/down/diagonal/left one cell]
+	and spread cell R to the right with same color B [up/down/diagonal/right one cell]
+	if they both reach the border, 
+	and there have another cell with color A have row index less than cell X then right up cell X have color A,
+	and there have another cell with color A have row index greater than cell X then right down cell X have color A
+	
+	3. do same as 2 with direction up/down
+	step 2. and 3. we will cache result of check reach border or not to the list of cells related for later check 
+	[value include: reach Left,  reach Right, reach Top, reach Down]
+	
+	
 
 =====================================================================================
 
