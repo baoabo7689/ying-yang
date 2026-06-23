@@ -50,11 +50,17 @@ export default function YinYangGridComponent({ grid, onCellClick, readonly = fal
                   border: `${borderCell}px solid #6b7280`,
                   boxSizing: 'border-box',
                   cursor: isClickable ? 'pointer' : 'default',
-                  // Yellow ring for clue cells
-                  outline: cell.isClue ? '2px solid #facc15' : undefined,
-                  outlineOffset: cell.isClue ? '-2px' : undefined,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  fontSize: Math.max(8, cellPx - 8),
+                  fontWeight: 'bold',
+                  color: cell.color === 'black' ? '#ffffff' : '#000000',
+                  userSelect: 'none',
                 }}
-              />
+              >
+                {cell.isClue && cell.color !== 'gray' ? (cell.color === 'black' ? 'B' : 'W') : null}
+              </div>
             );
           })}
         </div>

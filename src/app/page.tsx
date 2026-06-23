@@ -172,7 +172,7 @@ export default function HomePage() {
             </h2>
             <YinYangGridComponent grid={grid} onCellClick={handleCellClick} />
             <p className="text-xs text-gray-400">
-              Click: gray → black → white → gray &nbsp;·&nbsp; yellow ring = clue
+              Click: gray → black → white → gray &nbsp;·&nbsp; B/W label = clue
             </p>
           </div>
 
