@@ -7,9 +7,6 @@ export interface ImportResult {
   error?: string;
 }
 
-// Accepted import format: rows separated by newlines, cells by space or nothing
-// B or b = black, W or w = white, _ or 0 or . = gray
-// Example 8x8: "B W _ _ B W _ B\n..."
 function parseToken(ch: string): CellColor | null {
   const u = ch.toUpperCase();
   if (u === 'B' || u === '1') return 'black';
@@ -19,28 +16,35 @@ function parseToken(ch: string): CellColor | null {
 }
 
 export const ioUtilities = {
-  importGrid(raw: string): ImportResult {
-    // Tokenize: extract all valid tokens
+  importGrid(raw: string, width?: number, height?: number): ImportResult {
     const tokens: CellColor[] = [];
     for (const ch of raw) {
       const parsed = parseToken(ch);
       if (parsed !== null) tokens.push(parsed);
     }
 
-    // Determine grid size from token count
     const total = tokens.length;
-    const size = Math.round(Math.sqrt(total));
-    if (size * size !== total || size < 4 || size > 16) {
-      return { success: false, error: `Expected n² tokens (n=4..16), got ${total}` };
+
+    // If width/height provided, validate; otherwise infer square
+    let w: number, h: number;
+    if (width && height) {
+      if (total !== width * height) {
+        return { success: false, error: `Expected ${width * height} tokens for ${width}×${height}, got ${total}` };
+      }
+      w = width; h = height;
+    } else {
+      const side = Math.round(Math.sqrt(total));
+      if (side * side !== total || side < 2 || side > 32) {
+        return { success: false, error: `Expected n² tokens (n=2..32), got ${total}` };
+      }
+      w = side; h = side;
     }
 
-    let grid = createEmptyGrid(size);
+    let grid = createEmptyGrid(w, h);
     for (let i = 0; i < total; i++) {
-      const r = Math.floor(i / size);
-      const c = i % size;
-      if (tokens[i] !== 'gray') {
-        grid = updateCell(grid, r, c, tokens[i]);
-      }
+      const r = Math.floor(i / w);
+      const c = i % w;
+      if (tokens[i] !== 'gray') grid = updateCell(grid, r, c, tokens[i]);
     }
 
     return { success: true, grid };

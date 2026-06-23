@@ -11,13 +11,12 @@ function shuffle<T>(arr: T[]): T[] {
   return result;
 }
 
-function violates2x2(board: Board, size: number, r: number, c: number): boolean {
-  // Check all 2x2 blocks that include (r,c)
-  for (let dr = 0; dr >= -1; dr -= 1) {
-    for (let dc = 0; dc >= -1; dc -= 1) {
+function violates2x2(board: Board, width: number, height: number, r: number, c: number): boolean {
+  for (let dr = 0; dr >= -1; dr--) {
+    for (let dc = 0; dc >= -1; dc--) {
       const tr = r + dr;
       const tc = c + dc;
-      if (tr < 0 || tc < 0 || tr + 1 >= size || tc + 1 >= size) continue;
+      if (tr < 0 || tc < 0 || tr + 1 >= height || tc + 1 >= width) continue;
       const quad = [board[tr][tc], board[tr][tc + 1], board[tr + 1][tc], board[tr + 1][tc + 1]];
       if (quad.some((v) => v === 'gray')) continue;
       const firstColor = quad[0];
@@ -27,22 +26,19 @@ function violates2x2(board: Board, size: number, r: number, c: number): boolean 
   return false;
 }
 
-function floodCount(board: Board, size: number, color: CellColor): number {
+function floodCount(board: Board, width: number, height: number, color: CellColor): number {
   let start: [number, number] | null = null;
-  for (let r = 0; r < size; r++) {
-    for (let c = 0; c < size; c++) {
-      if (board[r][c] === color) { start = [r, c]; break; }
-    }
-    if (start) break;
-  }
+  outer: for (let r = 0; r < height; r++)
+    for (let c = 0; c < width; c++)
+      if (board[r][c] === color) { start = [r, c]; break outer; }
   if (!start) return 0;
 
-  const visited = Array.from({ length: size }, () => Array(size).fill(false));
+  const visited = Array.from({ length: height }, () => Array(width).fill(false));
   const stack: [number, number][] = [start];
   let count = 0;
   while (stack.length > 0) {
     const [r, c] = stack.pop()!;
-    if (r < 0 || r >= size || c < 0 || c >= size || visited[r][c] || board[r][c] !== color) continue;
+    if (r < 0 || r >= height || c < 0 || c >= width || visited[r][c] || board[r][c] !== color) continue;
     visited[r][c] = true;
     count++;
     stack.push([r - 1, c], [r + 1, c], [r, c - 1], [r, c + 1]);
@@ -50,71 +46,73 @@ function floodCount(board: Board, size: number, color: CellColor): number {
   return count;
 }
 
-function totalCount(board: Board, size: number, color: CellColor): number {
+function totalCount(board: Board, width: number, height: number, color: CellColor): number {
   let n = 0;
-  for (let r = 0; r < size; r++)
-    for (let c = 0; c < size; c++)
+  for (let r = 0; r < height; r++)
+    for (let c = 0; c < width; c++)
       if (board[r][c] === color) n++;
   return n;
 }
 
-function isConnected(board: Board, size: number, color: CellColor): boolean {
-  const total = totalCount(board, size, color);
+function isConnected(board: Board, width: number, height: number, color: CellColor): boolean {
+  const total = totalCount(board, width, height, color);
   if (total <= 1) return true;
-  return floodCount(board, size, color) === total;
+  return floodCount(board, width, height, color) === total;
 }
 
-function fillBoard(board: Board, size: number, index: number): boolean {
-  if (index >= size * size) {
-    return isConnected(board, size, 'black') && isConnected(board, size, 'white');
+function fillBoard(board: Board, width: number, height: number, index: number): boolean {
+  const total = width * height;
+  if (index >= total) {
+    return isConnected(board, width, height, 'black') && isConnected(board, width, height, 'white');
   }
-  const r = Math.floor(index / size);
-  const c = index % size;
+  const r = Math.floor(index / width);
+  const c = index % width;
   const colors = shuffle<CellColor>(['black', 'white']);
 
   for (const color of colors) {
     board[r][c] = color;
-    if (!violates2x2(board, size, r, c)) {
-      if (fillBoard(board, size, index + 1)) return true;
+    if (!violates2x2(board, width, height, r, c)) {
+      if (fillBoard(board, width, height, index + 1)) return true;
     }
     board[r][c] = 'gray';
   }
   return false;
 }
 
-function generateFullBoard(size: number): Board | null {
-  const board: Board = Array.from({ length: size }, () => Array(size).fill('gray'));
-  if (fillBoard(board, size, 0)) return board;
+function generateFullBoard(width: number, height: number): Board | null {
+  const board: Board = Array.from({ length: height }, () => Array(width).fill('gray'));
+  if (fillBoard(board, width, height, 0)) return board;
   return null;
 }
 
-function generatePuzzle(size: number, clues: number): Board | null {
-  const full = generateFullBoard(size);
+function generatePuzzle(width: number, height: number, clues: number): Board | null {
+  const full = generateFullBoard(width, height);
   if (!full) return null;
 
-  const total = size * size;
+  const total = width * height;
   const positions = shuffle(Array.from({ length: total }, (_, i) => i));
   const puzzle: Board = full.map((row) => [...row]);
-  const toRemove = total - clues;
 
-  for (let i = 0; i < toRemove; i++) {
+  for (let i = 0; i < total - clues; i++) {
     const pos = positions[i];
-    puzzle[Math.floor(pos / size)][pos % size] = 'gray';
+    puzzle[Math.floor(pos / width)][pos % width] = 'gray';
   }
 
   return puzzle;
 }
 
-const EASY_CLUES: Record<number, number> = { 6: 20, 8: 36, 10: 56 };
-const MEDIUM_CLUES: Record<number, number> = { 6: 14, 8: 28, 10: 44 };
-const HARD_CLUES: Record<number, number> = { 6: 10, 8: 20, 10: 32 };
+function defaultClues(width: number, height: number): number {
+  const total = width * height;
+  return Math.round(total * 0.35);
+}
 
 export const initUtilities = {
-  random(difficulty: 'easy' | 'medium' | 'hard', size = 8): Board | null {
-    const map = difficulty === 'easy' ? EASY_CLUES : difficulty === 'medium' ? MEDIUM_CLUES : HARD_CLUES;
-    return generatePuzzle(size, map[size] ?? Math.floor((size * size) * 0.4));
+  random(difficulty: 'easy' | 'medium' | 'hard', width = 15, height = 15): Board | null {
+    const total = width * height;
+    const ratio = difficulty === 'easy' ? 0.45 : difficulty === 'medium' ? 0.35 : 0.25;
+    return generatePuzzle(width, height, Math.round(total * ratio));
   },
-  generateFull(size = 8): Board | null {
-    return generateFullBoard(size);
+  generateFull(width = 15, height = 15): Board | null {
+    return generateFullBoard(width, height);
   },
 };

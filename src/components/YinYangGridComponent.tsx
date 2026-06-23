@@ -9,54 +9,52 @@ interface Props {
   readonly?: boolean;
 }
 
-function cellBg(color: CellColor, isClue: boolean, isHint: boolean): string {
-  if (color === 'black') return isClue ? 'bg-gray-900' : isHint ? 'bg-gray-700' : 'bg-gray-800';
-  if (color === 'white') return isClue ? 'bg-white border border-gray-400' : isHint ? 'bg-gray-50 border border-gray-300' : 'bg-white border border-gray-300';
-  return 'bg-gray-400'; // gray = unknown
-}
+// Max pixel width the grid should occupy
+const MAX_GRID_PX = 520;
 
-function cellLabel(color: CellColor): string {
-  if (color === 'black') return '●';
-  if (color === 'white') return '○';
-  return '';
-}
-
-function cellTextColor(color: CellColor): string {
-  if (color === 'black') return 'text-white';
-  if (color === 'white') return 'text-gray-800';
-  return 'text-gray-600';
+function cellStyle(color: CellColor): { bg: string; label: string } {
+  if (color === 'black') return { bg: '#1a1a1a', label: '' };
+  if (color === 'white') return { bg: '#ffffff', label: '' };
+  return { bg: '#9ca3af', label: '' }; // gray-400 for unknown
 }
 
 export default function YinYangGridComponent({ grid, onCellClick, readonly = false }: Props) {
-  const { size, cells } = grid;
-  const cellSize = size <= 8 ? 48 : size <= 10 ? 40 : 32;
+  const { width, height, cells } = grid;
+  const cellPx = Math.max(16, Math.min(40, Math.floor(MAX_GRID_PX / Math.max(width, height))));
+  const borderOuter = 2;
+  const borderCell = 1;
 
   return (
     <div
-      className="inline-block border-2 border-gray-700"
-      style={{ userSelect: 'none' }}
+      style={{
+        display: 'inline-flex',
+        flexDirection: 'column',
+        border: `${borderOuter}px solid #374151`,
+        boxSizing: 'content-box',
+      }}
     >
       {cells.map((rowArr, r) => (
-        <div key={r} className="flex">
+        <div key={r} style={{ display: 'flex' }}>
           {rowArr.map((cell, c) => {
+            const { bg } = cellStyle(cell.color);
             const isClickable = !readonly && !cell.isClue;
             return (
               <div
                 key={c}
                 onClick={() => isClickable && onCellClick?.(r, c)}
-                className={[
-                  cellBg(cell.color, cell.isClue, cell.isHint),
-                  cellTextColor(cell.color),
-                  'flex items-center justify-center font-bold select-none',
-                  'border border-gray-300',
-                  isClickable ? 'cursor-pointer hover:opacity-80' : 'cursor-default',
-                  cell.isClue ? 'ring-2 ring-inset ring-yellow-400' : '',
-                ].join(' ')}
-                style={{ width: cellSize, height: cellSize, fontSize: cellSize * 0.5 }}
-                title={`(${r + 1},${c + 1}) ${cell.color}${cell.isClue ? ' [clue]' : ''}${cell.isHint ? ' [hint]' : ''}`}
-              >
-                {cellLabel(cell.color)}
-              </div>
+                title={`(${r + 1},${c + 1}) ${cell.color}${cell.isClue ? ' [clue]' : ''}`}
+                style={{
+                  width: cellPx,
+                  height: cellPx,
+                  backgroundColor: bg,
+                  border: `${borderCell}px solid #6b7280`,
+                  boxSizing: 'border-box',
+                  cursor: isClickable ? 'pointer' : 'default',
+                  // Yellow ring for clue cells
+                  outline: cell.isClue ? '2px solid #facc15' : undefined,
+                  outlineOffset: cell.isClue ? '-2px' : undefined,
+                }}
+              />
             );
           })}
         </div>

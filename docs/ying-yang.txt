@@ -53,7 +53,19 @@ Solution base on idea:
 	step 2. and 3. we will cache result of check reach border or not to the list of cells related for later check 
 	[value include: reach Left,  reach Right, reach Top, reach Down]
 	
+
 	
+rearrange layout same as image, I want 1 random button [not split to easy/normal/hard mode]
+
+
+I want inputs to input width and height of grid, separate that to Size block on top, default is 15x15, make cell smaller to fit with screen.
+Functional block split into 2 row:
+Validate, Export, Solve
+Reset, Block Init
+Cell color with black or white [gray for unknown as begin]
+No need color for hint.
+
+
 
 =====================================================================================
 
